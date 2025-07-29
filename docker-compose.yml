@@ -41,6 +41,22 @@ services:
     networks:
       - app-php
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_USER: user
+      PMA_PASSWORD: user123
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 8181:80
+    depends_on:
+      - db
+    networks:
+      - app-php
+
 networks:
   app-php:
     driver: bridge

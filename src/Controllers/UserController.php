@@ -19,12 +19,4 @@ class UserController
         $users = $this->user->all();
         echo json_encode(['data' => $users]);
     }
-
-    public function store() {}
-
-    public function update() {}
-
-    public function destroy() {}
-
-    public function login() {}
 }

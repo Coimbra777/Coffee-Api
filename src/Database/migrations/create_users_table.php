@@ -1,9 +1,8 @@
 <?php
 
-use Src\Database\Database;
+require_once __DIR__ . '/../../../autoload.php';
 
-// require_once __DIR__ . '/../../Core/Autoload.php';
-// new Autoload();
+use Src\Database\Database;
 
 $db = Database::getInstance();
 
@@ -14,6 +13,7 @@ $query = "
         email VARCHAR(100) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
         drink_counter INT DEFAULT 0,
+        token VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=INNODB;
 ";
@@ -22,7 +22,6 @@ try {
     $db->exec($query);
     echo json_encode(["success" => "Tabela users criada com sucesso."]);
 } catch (PDOException $e) {
+    http_response_code(500);
     echo json_encode(["error" => $e->getMessage()]);
 }
-
-// docker exec -it php_app php src/Database/migrations/create_users_table.php

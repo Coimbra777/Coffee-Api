@@ -1,5 +1,7 @@
 <?php
 
+namespace Src\Core;
+
 use Src\Models\User;
 
 class Router
