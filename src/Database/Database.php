@@ -13,7 +13,7 @@ class Database
     {
         if (!self::$instance) {
             $host = 'mysql_db';
-            $db = 'database';
+            $db = 'coffee';
             $user = 'user';
             $pass = 'user123';
             $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";

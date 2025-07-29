@@ -2,8 +2,8 @@
 
 use Src\Database\Database;
 
-require_once __DIR__ . '/../../Core/Autoload.php';
-new Autoload();
+// require_once __DIR__ . '/../../Core/Autoload.php';
+// new Autoload();
 
 $db = Database::getInstance();
 

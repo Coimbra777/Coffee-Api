@@ -8,17 +8,16 @@ date_default_timezone_set("America/Sao_Paulo");
 require_once __DIR__ . '/../src/Core/Autoload.php';
 Autoload::load(__DIR__ . '/../src');
 
-$uri = $_GET['url'] ?? '';
+$uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 
-// Carrega o roteador
 $router = new Router();
 $router
-    ->add("POST", "users", "UserController::store", false)
-    ->add("GET", "users/[PARAM]", "UserController::show", true)
-    ->add("GET", "users", "UserController::index", true)
-    ->add("PUT", "users/[PARAM]", "UserController::update", true)
-    ->add("DELETE", "users/[PARAM]", "UserController::destroy", true)
     ->add("POST", "login", "AuthController::login", false)
-    ->add("POST", "users/[PARAM]/drink", "UserController::drink", true);
+    ->add("GET", "users", "Src\Controllers\UserController::index", false)
+    ->add("POST", "users", "Src\Controllers\UserController:store", false)
+    ->add("GET", "users/[PARAM]", "Src\Controllers\UserController:show", true)
+    ->add("PUT", "users/[PARAM]", "Src\Controllers\UserController:update", true)
+    ->add("DELETE", "users/[PARAM]", "Src\Controllers\UserController:destroy", true)
+    ->add("POST", "users/[PARAM]/drink", "Src\Controllers\UserController:drink", true);
 
 $router->dispatch($uri);

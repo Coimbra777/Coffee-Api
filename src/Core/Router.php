@@ -4,13 +4,14 @@ use Src\Models\User;
 
 class Router
 {
-    private $routes = [''];
-    private $callbacks = [''];
-    private $protectedRoutes = [''];
+    private $routes = [];
+    private $callbacks = [];
+    private $protectedRoutes = [];
 
     public function add($method, $route, $callback, $protected)
     {
-        $this->routes[] = strtoupper($method) . ':' . $route;
+        $route = ltrim($route, '/');
+        $this->routes[] = strtoupper($method) . ':/' . $route;
         $this->callbacks[] = $callback;
         $this->protectedRoutes[] = $protected;
 
@@ -33,7 +34,8 @@ class Router
         }
 
         $index = array_search($uri, $this->routes);
-        if ($index > 0) {
+
+        if ($index !== false) {
             $callback = explode("::", $this->callbacks[$index]);
             $protected = $this->protectedRoutes[$index];
         }
@@ -46,20 +48,24 @@ class Router
                 $instance = new $class();
 
                 if ($protected) {
-                    $auth = new User();
+                    // $auth = new User();
                     // if ($auth->verificar()) {
                     //     return call_user_func_array([$instance, $method], [$param]);
                     // } else {
                     //     echo json_encode(["error" => "Invalid token."]);
+                    //     return; // Para a execução aqui
                     // }
+                    return;
                 } else {
                     return call_user_func_array([$instance, $method], [$param]);
                 }
             } else {
                 $this->notFound();
+                return;
             }
         } else {
             $this->notFound();
+            return;
         }
     }
 
