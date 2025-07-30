@@ -37,33 +37,13 @@ class UserController
         }
     }
 
-    public function store()
-    {
-        $data = json_decode(file_get_contents("php://input"), true) ?? $_POST;
-
-        $validator = new UserValidator();
-
-        if (!$validator->validate($data)) {
-            http_response_code(422);
-            echo json_encode(['errors' => $validator->getErrors()]);
-            return;
-        }
-
-        $validatedData = $validator->validatedData($data);
-
-        $result = $this->user->create($validatedData);
-
-        if (isset($result['success']) && $result['success'] === true) {
-            echo json_encode(['message' => 'User created successfully']);
-        } else {
-            http_response_code(400);
-            echo json_encode(['error' => $result['error'] ?? 'Failed to create user']);
-        }
-    }
-
     public function update($id)
     {
-        $data = json_decode(file_get_contents("php://input"), true) ?? $_POST;
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        if (!$data) {
+            $data = $_POST;
+        }
 
         $validator = new UserValidator();
 

@@ -62,6 +62,17 @@ class User
             return ['error' => 'No data provided'];
         }
 
+        if (isset($data['email'])) {
+            $stmt = $this->db->prepare("SELECT id FROM users WHERE email = :email AND id != :id");
+            $stmt->bindParam(':email', $data['email']);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+
+            if ($stmt->rowCount() > 0) {
+                return ['error' => 'Email already in use by another user'];
+            }
+        }
+
         $sql = "UPDATE users SET ";
         $fields = [];
         $values = [];

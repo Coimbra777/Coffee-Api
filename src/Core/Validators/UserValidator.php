@@ -7,13 +7,13 @@ use Src\Core\RequestValidator;
 class UserValidator extends RequestValidator
 {
     protected array $rules = [
-        'name'     => 'required',
+        'name'     => 'min:3',
         'email'    => 'required|email',
         'password' => 'required',
     ];
 
     protected array $messages = [
-        'name.required'     => 'Name is required',
+        'name.min'          => 'Name must be at least 3 characters',
         'email.required'    => 'Email is required',
         'email.email'       => 'Email must be valid',
         'password.required' => 'Password is required',

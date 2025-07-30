@@ -14,7 +14,7 @@ class RequestValidator
 
         // 1. Verifica se há campos inválidos (não definidos nas regras)
         foreach ($data as $field => $value) {
-            if (!array_key_exists($field, $this->rules)) {
+            if (!array_key_exists($field, $this->rules) && $field !== '_method') {
                 $this->errors[$field][] = "$field is not a valid field";
             }
         }
@@ -28,8 +28,16 @@ class RequestValidator
                 if ($rule === 'required' && (is_null($value) || $value === '')) {
                     $this->errors[$field][] = $this->messages["$field.required"] ?? "$field is required";
                 }
+
                 if ($rule === 'email' && !empty($value) && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
                     $this->errors[$field][] = $this->messages["$field.email"] ?? "$field must be a valid email";
+                }
+
+                if (str_starts_with($rule, 'min:')) {
+                    $minLength = (int) explode(':', $rule)[1];
+                    if (!empty($value) && strlen($value) < $minLength) {
+                        $this->errors[$field][] = $this->messages["$field.min"] ?? "$field must be at least $minLength characters";
+                    }
                 }
             }
         }
