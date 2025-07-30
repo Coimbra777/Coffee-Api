@@ -3,6 +3,7 @@
 namespace Src\Core;
 
 use Src\Models\User;
+use Src\Services\AuthService;
 
 class Router
 {
@@ -29,8 +30,7 @@ class Router
         $requestMethod = $_POST['_method'] ?? $requestMethod;
         $uri = $requestMethod . ":/" . $uri;
 
-        // Check if route has a parameter
-        if (substr_count($uri, "/") >= 3) {
+        if (substr_count($uri, "/") >= 2) {
             $param = substr($uri, strrpos($uri, "/") + 1);
             $uri = substr($uri, 0, strrpos($uri, "/")) . "/[PARAM]";
         }
@@ -49,15 +49,25 @@ class Router
             if (method_exists($class, $method)) {
                 $instance = new $class();
 
+
                 if ($protected) {
-                    // $auth = new User();
-                    // if ($auth->verificar()) {
-                    //     return call_user_func_array([$instance, $method], [$param]);
-                    // } else {
-                    //     echo json_encode(["error" => "Invalid token."]);
-                    //     return; // Para a execução aqui
-                    // }
-                    return;
+                    if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+                        // Token geralmente vem no header Authorization: Bearer <token>
+                        $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+                        $token = str_replace('Bearer ', '', $authHeader);
+
+                        if (AuthService::verify($token)) {
+                            return call_user_func_array([$instance, $method], [$param]);
+                        } else {
+                            http_response_code(401);
+                            echo json_encode(["error" => "Invalid token."]);
+                            return;
+                        }
+                    } else {
+                        http_response_code(401);
+                        echo json_encode(["error" => "Authorization token not provided."]);
+                        return;
+                    }
                 } else {
                     return call_user_func_array([$instance, $method], [$param]);
                 }

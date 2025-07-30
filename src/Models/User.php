@@ -20,11 +20,10 @@ class User
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function create($name, $email, $password)
+    public static function register($name, $email, $password)
     {
         $db = Database::getInstance();
 
-        // Verifica se já existe usuário com esse email
         $stmt = $db->prepare("SELECT id FROM users WHERE email = :email");
         $stmt->bindParam(':email', $email);
         $stmt->execute();
@@ -45,6 +44,50 @@ class User
         } else {
             return ['error' => 'Failed to create user'];
         }
+    }
+
+    public function create($data)
+    {
+        $stmt = $this->db->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)");
+        $stmt->execute($data);
+    }
+
+    public function update($id, $data)
+    {
+        if (isset($data['_method'])) {
+            unset($data['_method']);
+        }
+
+        if (empty($data)) {
+            return ['error' => 'No data provided'];
+        }
+
+        $sql = "UPDATE users SET ";
+        $fields = [];
+        $values = [];
+
+        foreach ($data as $key => $value) {
+            $fields[] = "{$key} = ?";
+            $values[] = $key === 'password' ? password_hash($value, PASSWORD_DEFAULT) : $value;
+        }
+
+        $sql .= implode(', ', $fields) . " WHERE id = ?";
+        $values[] = $id;
+
+        $stmt = $this->db->prepare($sql);
+        $success = $stmt->execute($values);
+
+        if ($success) {
+            return ['success' => true];
+        } else {
+            return ['error' => 'Failed to update user'];
+        }
+    }
+
+    public function find($id)
+    {
+        $stmt = $this->db->query("SELECT id, name, email, drink_counter FROM users WHERE id = $id");
+        return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
     public static function findByEmail($email)

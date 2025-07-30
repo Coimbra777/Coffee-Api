@@ -17,8 +17,8 @@ $router = new Router();
 $router
     ->add("POST", "login", "Src\Controllers\AuthController::login", false)
     ->add("POST", "register", "Src\Controllers\AuthController::register", false)
-    ->add("GET", "users", "Src\Controllers\UserController::index", false)
-    ->add("POST", "users", "Src\Controllers\UserController::store", false)
+    ->add("GET", "users", "Src\Controllers\UserController::index", true)
+    ->add("POST", "users", "Src\Controllers\UserController::store", true)
     ->add("GET", "users/[PARAM]", "Src\Controllers\UserController::show", true)
     ->add("PUT", "users/[PARAM]", "Src\Controllers\UserController::update", true)
     ->add("DELETE", "users/[PARAM]", "Src\Controllers\UserController::destroy", true)
