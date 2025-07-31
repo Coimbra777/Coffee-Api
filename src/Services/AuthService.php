@@ -33,25 +33,29 @@ class AuthService
 
     public static function verify($token)
     {
-        $decoded = JWT::decode($token, $GLOBALS['secretJWT']);
+        try {
+            $decoded = JWT::decode($token, $GLOBALS['secretJWT']);
 
-        if (isset($decoded->expires_in) && $decoded->expires_in < time()) {
-            return ['expired' => true];
-        }
+            if (isset($decoded->expires_in) && $decoded->expires_in < time()) {
+                return ['expired' => true];
+            }
 
-        $userId = $decoded->sub ?? $decoded->id ?? null;
+            $userId = $decoded->sub ?? $decoded->id ?? null;
 
-        if (!$userId) {
+            if (!$userId) {
+                return false;
+            }
+
+            $userModel = new User();
+            $user = $userModel->find($userId);
+
+            if (!$user) {
+                return false;
+            }
+
+            return $user;
+        } catch (\Exception $e) {
             return false;
         }
-
-        $userModel = new User();
-        $user = $userModel->find($userId);
-
-        if (!$user) {
-            return false;
-        }
-
-        return $user;
     }
 }

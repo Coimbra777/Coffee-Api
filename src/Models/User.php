@@ -95,6 +95,18 @@ class User
         }
     }
 
+    public function delete($id)
+    {
+        $stmt = $this->db->prepare("DELETE FROM users WHERE id = :id");
+        $stmt->bindParam(':id', $id);
+
+        if ($stmt->execute()) {
+            return ['success' => true];
+        } else {
+            return ['error' => 'Falha ao excluir usuário'];
+        }
+    }
+
     public function find($id)
     {
         $stmt = $this->db->query("SELECT id, name, email, drink_counter FROM users WHERE id = $id");

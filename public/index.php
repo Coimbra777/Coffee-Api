@@ -20,7 +20,7 @@ $router
     ->add("GET", "users", "Src\Controllers\UserController::index", true)
     ->add("GET", "users/[PARAM]", "Src\Controllers\UserController::show", true)
     ->add("PUT", "users/[PARAM]", "Src\Controllers\UserController::update", true)
-    ->add("DELETE", "users/[PARAM]", "Src\Controllers\UserController::destroy", true)
+    ->add("DELETE", "users/[PARAM]", "Src\Controllers\UserController::delete", true)
     ->add("POST", "users/[PARAM]/drink", "Src\Controllers\UserController::drink", true);
 
 $router->dispatch($uri);

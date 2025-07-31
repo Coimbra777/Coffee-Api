@@ -30,15 +30,16 @@ class UserController
 
     public function show($id)
     {
+        $authUser = $_REQUEST['authenticated_user'] ?? null;
+
+        if (!$authUser || !is_object($authUser) || $authUser->id != $id) {
+            return $this->response->unauthorized("Você não tem permissão para atualizar este usuário.");
+        }
+
         $user = $this->user->find($id);
 
         if (!$user) {
             return $this->response->notFound('Usuário não encontrado.');
-        }
-
-        $authUser = $_REQUEST['authenticated_user'] ?? null;
-        if (!$authUser || $authUser->id != $id) {
-            return $this->response->unauthorized("Acesso não autorizado a outro usuário.");
         }
 
         return $this->response->success('Usuário recuperado com sucesso.', $user);
@@ -67,6 +68,23 @@ class UserController
             return $this->response->success('Usuário atualizado com sucesso.');
         } else {
             return $this->response->error($result['error'] ?? 'Erro ao atualizar usuário');
+        }
+    }
+
+    public function delete($id)
+    {
+        $authUser = $_REQUEST['authenticated_user'] ?? null;
+
+        if (!$authUser || !is_object($authUser) || $authUser->id != $id) {
+            return $this->response->unauthorized("Você não tem permissão para atualizar este usuário.");
+        }
+
+        $result = $this->user->delete($id);
+
+        if (isset($result['success']) && $result['success'] === true) {
+            return $this->response->success('Usuário excluido com sucesso.');
+        } else {
+            return $this->response->error($result['error'] ?? 'Erro ao excluir usuário');
         }
     }
 }
