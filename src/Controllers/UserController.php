@@ -30,16 +30,15 @@ class UserController
 
     public function show($id)
     {
-        $authUser = $_REQUEST['authenticated_user'] ?? null;
-
-        if (!$authUser || !is_object($authUser) || $authUser->id != $id) {
-            return $this->response->unauthorized("Você não tem permissão para atualizar este usuário.");
-        }
-
+        $authUser = $_REQUEST['authenticated_user']['user'] ?? null;
         $user = $this->user->find($id);
 
         if (!$user) {
             return $this->response->notFound('Usuário não encontrado.');
+        }
+
+        if (!$authUser || $authUser->id != $id) {
+            return $this->response->unauthorized("Você não tem permissão para acessar este usuário.");
         }
 
         return $this->response->success('Usuário recuperado com sucesso.', $user);
@@ -47,9 +46,15 @@ class UserController
 
     public function update($id)
     {
-        $authUser = $_REQUEST['authenticated_user'] ?? null;
+        $user = $this->user->find($id);
 
-        if (!$authUser || !is_object($authUser) || $authUser->id != $id) {
+        if (!$user) {
+            return $this->response->notFound('Usuário não encontrado.');
+        }
+
+        $authUser = $_REQUEST['authenticated_user']['user'] ?? null;
+
+        if (!$authUser || $authUser->id != $id) {
             return $this->response->unauthorized("Você não tem permissão para atualizar este usuário.");
         }
 
@@ -62,10 +67,11 @@ class UserController
         }
 
         $validatedData = $validator->validatedData($data);
+
         $result = $this->user->update($id, $validatedData);
 
         if (isset($result['success']) && $result['success'] === true) {
-            return $this->response->success('Usuário atualizado com sucesso.');
+            return $this->response->success('Usuário atualizado com sucesso.', $result['user']);
         } else {
             return $this->response->error($result['error'] ?? 'Erro ao atualizar usuário');
         }
@@ -73,16 +79,22 @@ class UserController
 
     public function delete($id)
     {
-        $authUser = $_REQUEST['authenticated_user'] ?? null;
+        $user = $this->user->find($id);
 
-        if (!$authUser || !is_object($authUser) || $authUser->id != $id) {
+        if (!$user) {
+            return $this->response->notFound('Usuário não encontrado.');
+        }
+
+        $authUser = $_REQUEST['authenticated_user']['user'] ?? null;
+
+        if (!$authUser || $authUser->id != $id) {
             return $this->response->unauthorized("Você não tem permissão para atualizar este usuário.");
         }
 
         $result = $this->user->delete($id);
 
         if (isset($result['success']) && $result['success'] === true) {
-            return $this->response->success('Usuário excluido com sucesso.');
+            return $this->response->success('Usuário excluído com sucesso.');
         } else {
             return $this->response->error($result['error'] ?? 'Erro ao excluir usuário');
         }

@@ -78,4 +78,19 @@ class CoffeeHistory
 
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Retorna a quantidade de cafés consumidos hoje pelo usuário selecionado
+     */
+    public function getTodayConsumptionByUser(int $userId): ?array
+    {
+        $sql = "SELECT u.name, ch.quantity
+            FROM coffee_history ch
+            JOIN users u ON u.id = ch.user_id
+            WHERE ch.user_id = :user_id AND ch.date = CURDATE()";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':user_id' => $userId]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+    }
 }

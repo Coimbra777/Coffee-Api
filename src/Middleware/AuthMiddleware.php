@@ -19,8 +19,8 @@ class AuthMiddleware
 
         $auth = AuthService::verify($token);
 
-        if (!$auth) {
-            (new Response())->unauthorized("Token inválido.");
+        if (!isset($auth['success']) || $auth['success'] === false) {
+            (new Response())->unauthorized($auth['message'] ?? "Token inválido.");
             exit;
         }
 

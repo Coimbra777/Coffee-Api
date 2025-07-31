@@ -13,21 +13,39 @@ class CoffeeService
         $this->coffeeHistory = new CoffeeHistory();
     }
 
-    public function incrementUserDrink(int $userId, int $quantity = 1): bool
+    /**
+     * Incrementa a quantidade de cafés consumidos no dia atual pelo usuário
+     */
+    public function incrementUserDrink(int $userId, int $quantity = 1): ?array
     {
-        return $this->coffeeHistory->incrementDailyConsumption($userId, $quantity);
+        $success = $this->coffeeHistory->incrementDailyConsumption($userId, $quantity);
+
+        if (!$success) {
+            return null;
+        }
+
+        return $this->coffeeHistory->getTodayConsumptionByUser($userId);
     }
 
+    /**
+     * Retorna o histórico diário de consumo de Café do usuário
+     */
     public function getUserDailyHistory(int $userId): array
     {
         return $this->coffeeHistory->getUserDailyHistory($userId);
     }
 
+    /**
+     * Retorna ranking de consumo por dia específico
+     */
     public function getRankingByDay(string $date): array
     {
         return $this->coffeeHistory->getRankingByDay($date);
     }
 
+    /**
+     * Retorna ranking de consumo nos últimos X dias
+     */
     public function getRankingLastDays(int $days): array
     {
         return $this->coffeeHistory->getRankingLastDays($days);

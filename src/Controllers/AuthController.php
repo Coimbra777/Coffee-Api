@@ -16,6 +16,9 @@ class AuthController
         $this->response = new Response();
     }
 
+    /**
+     * Faz login e retorna o token
+     */
     public function login()
     {
         $input = json_decode(file_get_contents("php://input"), true) ?? $_POST;
@@ -39,10 +42,12 @@ class AuthController
         return $this->response->error($auth['message'], $auth['status']);
     }
 
+    /**
+     * Cria um novo usuário
+     */
     public function register()
     {
-        $input = json_decode(file_get_contents("php://input"), true);
-        if (!$input) $input = $_POST;
+        $input = json_decode(file_get_contents("php://input"), true) ?? $_POST;
 
         $validator = new AuthValidator();
 

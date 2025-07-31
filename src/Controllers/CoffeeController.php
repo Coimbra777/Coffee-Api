@@ -3,27 +3,38 @@
 namespace Src\Controllers;
 
 use Core\Response;
-use Src\Core\Validators\DrinkValidator;
+use Src\Models\User;
 use Src\Services\CoffeeService;
+use Src\Core\Validators\DrinkValidator;
 
 class CoffeeController
 {
+    private User $user;
     private Response $response;
     private CoffeeService $coffeeService;
 
     public function __construct()
     {
+        $this->user = new User();
         $this->response = new Response();
         $this->coffeeService = new CoffeeService();
     }
 
+    /**
+     * Incrementa a quantidade de cafés consumidos no dia atual pelo usuário
+     */
     public function drink($userId)
     {
-        $auth = $_REQUEST['authenticated_user'] ?? null;
-        $authUser = is_array($auth) && isset($auth['user']) ? $auth['user'] : null;
+        $user = $this->user->find($userId);
 
-        if (!$authUser || !is_object($authUser) || $authUser->id != $userId) {
-            return $this->response->unauthorized("Você não tem permissão para registrar café para este usuário.");
+        if (!$user) {
+            return $this->response->notFound('Usuário não encontrado.');
+        }
+
+        $authUser = $_REQUEST['authenticated_user']['user'] ?? null;
+
+        if (!$authUser || $authUser->id != $userId) {
+            return $this->response->unauthorized("Você não tem permissão para atualizar este usuário.");
         }
 
         $data = json_decode(file_get_contents("php://input"), true) ?? $_POST;
@@ -37,15 +48,18 @@ class CoffeeController
         $validated = $validator->validatedData($data);
         $quantity = $validated['drink'];
 
-        $success = $this->coffeeService->incrementUserDrink((int)$userId, $quantity);
+        $updatedData = $this->coffeeService->incrementUserDrink((int)$userId, $quantity);
 
-        if (!$success) {
+        if (!$updatedData) {
             return $this->response->error("Erro ao atualizar contador de cafés.");
         }
 
-        return $this->response->success("Contador de cafés atualizado com sucesso.");
+        return $this->response->success("Contador de cafés atualizado com sucesso.", $updatedData);
     }
 
+    /**
+     * Retorna o histórico diário de consumo de Café do usuário
+     */
     public function history($userId)
     {
         $history = $this->coffeeService->getUserDailyHistory((int)$userId);
@@ -53,6 +67,9 @@ class CoffeeController
         return $this->response->success("Histórico de consumo recuperado.", $history);
     }
 
+    /**
+     * Retorna ranking de consumo por dia específico
+     */
     public function rankingByDay($date)
     {
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
@@ -64,6 +81,9 @@ class CoffeeController
         return $this->response->success("Ranking por dia obtido com sucesso.", $ranking);
     }
 
+    /**
+     * Retorna ranking de consumo nos últimos X dias
+     */
     public function rankingLastDays($days)
     {
         $days = (int)$days;
@@ -73,6 +93,6 @@ class CoffeeController
 
         $ranking = $this->coffeeService->getRankingLastDays($days);
 
-        return $this->response->success("Ranking dos últimos dias obtido com sucesso.", $ranking);
+        return $this->response->success("Ranking dos últimos {$days} dias obtido com sucesso.", $ranking);
     }
 }

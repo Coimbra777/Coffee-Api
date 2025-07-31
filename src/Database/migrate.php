@@ -12,9 +12,6 @@ $files = scandir($migrationsPath);
 
 foreach ($files as $file) {
     if (preg_match('/\.php$/', $file)) {
-        echo "Running migration: $file\n";
         require_once $migrationsPath . '/' . $file;
     }
 }
-
-echo "All migrations executed.\n";

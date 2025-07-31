@@ -14,12 +14,19 @@ class User
         $this->db = Database::getInstance();
     }
 
+    /**
+     *  Retorna todos os usuários cadastrados
+     */
     public function all()
     {
-        $stmt = $this->db->query("SELECT id, name, email, drink_counter FROM users");
+        // $stmt = $this->db->query("SELECT id, name, email FROM users");
+        $stmt = $this->db->query("SELECT COUNT(*) as total FROM users");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     *  Cria um novo usuário
+     */
     public static function register($name, $email, $password)
     {
         $db = Database::getInstance();
@@ -46,12 +53,9 @@ class User
         }
     }
 
-    public function create($data)
-    {
-        $stmt = $this->db->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)");
-        $stmt->execute($data);
-    }
-
+    /**
+     *  Atualiza um usuário
+     */
     public function update($id, $data)
     {
         if (isset($data['_method'])) {
@@ -89,12 +93,18 @@ class User
         $success = $stmt->execute($values);
 
         if ($success) {
-            return ['success' => true];
-        } else {
-            return ['error' => 'Falha ao atualizar usuário'];
+            return [
+                'success' => true,
+                'user' => $this->find($id)
+            ];
         }
+
+        return ['error' => 'Falha ao atualizar usuário'];
     }
 
+    /**
+     *  Exclui um usuário
+     */
     public function delete($id)
     {
         $stmt = $this->db->prepare("DELETE FROM users WHERE id = :id");
@@ -107,12 +117,18 @@ class User
         }
     }
 
+    /**
+     *  Busca um usuário pelo ID
+     */
     public function find($id)
     {
-        $stmt = $this->db->query("SELECT id, name, email, drink_counter FROM users WHERE id = $id");
+        $stmt = $this->db->query("SELECT id, name, email FROM users WHERE id = $id");
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
+    /**
+     *  Busca um usuário pelo email
+     */
     public static function findByEmail($email)
     {
         $db = Database::getInstance();
@@ -124,6 +140,23 @@ class User
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
+    /**
+     *  Busca um usuário pelo token
+     */
+    public static function findByToken(string $token)
+    {
+        $db = Database::getInstance();
+
+        $stmt = $db->prepare("SELECT * FROM users WHERE token = :token LIMIT 1");
+        $stmt->bindParam(':token', $token);
+        $stmt->execute();
+
+        return $stmt->fetch(\PDO::FETCH_OBJ);
+    }
+
+    /**
+     *  Atualiza o token de um usuário
+     */
     public static function updateToken($id, $token)
     {
         $db = Database::getInstance();

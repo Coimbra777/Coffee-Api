@@ -68,13 +68,13 @@ class AuthService
             }
 
             $userModel = new User();
-            $user = $userModel->find($userId);
+            $user = $userModel->findByToken($token);
 
             if (!$user) {
                 return [
                     'success' => false,
-                    'status' => 404,
-                    'message' => 'Usuário não encontrado.'
+                    'status' => 401,
+                    'message' => 'Token inválido.'
                 ];
             }
 

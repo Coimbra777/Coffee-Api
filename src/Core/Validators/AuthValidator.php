@@ -10,13 +10,14 @@ class AuthValidator extends RequestValidator
     {
         $this->rules = [
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required|min:6'
         ];
 
         $this->messages = [
-            'email.required' => 'email is required',
-            'email.email' => 'Email must be a valid address',
-            'password.required' => 'Password is required'
+            'email.required' => 'O campo email é obrigatório.',
+            'email.email' => 'O email deve ser um endereço válido.',
+            'password.required' => 'O campo senha é obrigatório.',
+            'password.min' => 'O campo senha deve ter no mínimo 6 caracteres.'
         ];
 
         return $this->validate($data);
@@ -25,14 +26,17 @@ class AuthValidator extends RequestValidator
     public function validateRegister(array $data): bool
     {
         $this->rules = [
+            'name' => 'min:3',
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required|min:6'
         ];
 
         $this->messages = [
-            'email.required' => 'email is required',
-            'email.email' => 'email must be a valid address',
-            'password.required' => 'Password is required'
+            'name.min' => 'O campo nome deve ter no mínimo 3 caracteres.',
+            'email.required' => 'O campo email é obrigatório.',
+            'email.email' => 'O email deve ser um endereço válido.',
+            'password.required' => 'O campo senha é obrigatório.',
+            'password.min' => 'O campo senha deve ter no mínimo 6 caracteres.'
         ];
 
         return $this->validate($data);
