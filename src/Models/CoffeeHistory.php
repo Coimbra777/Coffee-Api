@@ -16,15 +16,15 @@ class CoffeeHistory
     /**
      * Incrementa a quantidade de cafés consumidos no dia atual pelo usuário
      */
-    public function incrementDailyConsumption(int $userId, int $quantity = 1): bool
+    public function incrementDailyConsumption(int $userId, int $quantity = 1, ?string $date = null): bool
     {
         $sql = "INSERT INTO coffee_history (user_id, date, quantity)
-                VALUES (:user_id, CURDATE(), :quantity)
-                ON DUPLICATE KEY UPDATE quantity = quantity + :quantity";
+            VALUES (:user_id, :date, :quantity)";
 
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             ':user_id' => $userId,
+            ':date' => $date ?? date('Y-m-d'),
             ':quantity' => $quantity,
         ]);
     }
@@ -80,17 +80,22 @@ class CoffeeHistory
     }
 
     /**
-     * Retorna a quantidade de cafés consumidos hoje pelo usuário selecionado
+     * Retorna a quantidade de cafés consumidos pelo usuário no dia especificado
      */
-    public function getTodayConsumptionByUser(int $userId): ?array
+    public function getConsumptionByUserOnDate(int $userId, ?string $date = null): ?array
     {
-        $sql = "SELECT u.name, ch.quantity
+        $sql = "SELECT u.name, SUM(ch.quantity) as quantity
             FROM coffee_history ch
             JOIN users u ON u.id = ch.user_id
-            WHERE ch.user_id = :user_id AND ch.date = CURDATE()";
+            WHERE ch.user_id = :user_id AND ch.date = :date
+            GROUP BY u.name";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([':user_id' => $userId]);
+        $stmt->execute([
+            ':user_id' => $userId,
+            ':date' => $date ?? date('Y-m-d'),
+        ]);
+
         return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
     }
 }

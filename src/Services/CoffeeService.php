@@ -16,15 +16,15 @@ class CoffeeService
     /**
      * Incrementa a quantidade de cafés consumidos no dia atual pelo usuário
      */
-    public function incrementUserDrink(int $userId, int $quantity = 1): ?array
+    public function incrementUserDrink(int $userId, int $quantity = 1, ?string $date = null): ?array
     {
-        $success = $this->coffeeHistory->incrementDailyConsumption($userId, $quantity);
+        $success = $this->coffeeHistory->incrementDailyConsumption($userId, $quantity, $date);
 
         if (!$success) {
             return null;
         }
 
-        return $this->coffeeHistory->getTodayConsumptionByUser($userId);
+        return $this->coffeeHistory->getConsumptionByUserOnDate($userId, $date);
     }
 
     /**

@@ -13,7 +13,6 @@ $query = "
         date DATE NOT NULL,
         quantity INT NOT NULL DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE KEY user_date (user_id, date),
         CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=INNODB;
 ";

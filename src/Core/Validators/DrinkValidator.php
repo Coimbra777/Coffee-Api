@@ -20,6 +20,17 @@ class DrinkValidator
             $this->errors['drink'] = 'O valor deve ser maior que zero.';
         }
 
+        if (isset($data['date'])) {
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data['date'])) {
+                $this->errors['date'] = 'Formato de data inválido. Use YYYY-MM-DD.';
+            } else {
+                $parts = explode('-', $data['date']);
+                if (!checkdate((int)$parts[1], (int)$parts[2], (int)$parts[0])) {
+                    $this->errors['date'] = 'Data inválida.';
+                }
+            }
+        }
+
         return empty($this->errors);
     }
 
@@ -30,6 +41,9 @@ class DrinkValidator
 
     public function validatedData(array $data): array
     {
-        return ['drink' => (int) $data['drink']];
+        return [
+            'drink' => (int) $data['drink'],
+            'date' => $data['date'] ?? null,
+        ];
     }
 }

@@ -48,7 +48,8 @@ class CoffeeController
         $validated = $validator->validatedData($data);
         $quantity = $validated['drink'];
 
-        $updatedData = $this->coffeeService->incrementUserDrink((int)$userId, $quantity);
+        $date = $validated['date'] ?? null;
+        $updatedData = $this->coffeeService->incrementUserDrink((int)$userId, $quantity, $date);
 
         if (!$updatedData) {
             return $this->response->error("Erro ao atualizar contador de cafés.");
