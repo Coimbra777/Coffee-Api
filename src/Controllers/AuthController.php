@@ -18,8 +18,7 @@ class AuthController
 
     public function login()
     {
-        $input = json_decode(file_get_contents("php://input"), true);
-        if (!$input) $input = $_POST;
+        $input = json_decode(file_get_contents("php://input"), true) ?? $_POST;
 
         $validator = new AuthValidator();
 
@@ -30,11 +29,14 @@ class AuthController
         $validated = $validator->validatedData($input);
         $auth = AuthService::login($validated['email'], $validated['password']);
 
-        if ($auth) {
-            return $this->response->json($auth);
+        if ($auth['success']) {
+            return $this->response->json([
+                'token' => $auth['token'],
+                'data' => $auth['data']
+            ]);
         }
 
-        return $this->response->unauthorized("Email ou senha inválidos.");
+        return $this->response->error($auth['message'], $auth['status']);
     }
 
     public function register()

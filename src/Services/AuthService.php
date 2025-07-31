@@ -11,24 +11,37 @@ class AuthService
     {
         $user = User::findByEmail($email);
 
-        if ($user && password_verify($password, $user->password)) {
-            $expiresIn = time() + 999999;
-
-            $token = JWT::encode([
-                'id' => $user->id,
-                'name' => $user->name,
-                'expires_in' => $expiresIn,
-            ], $GLOBALS['secretJWT']);
-
-            User::updateToken($user->id, $token);
-
+        if (!$user) {
             return [
-                'token' => $token,
-                'data' => JWT::decode($token, $GLOBALS['secretJWT']),
+                'success' => false,
+                'status' => 404,
+                'message' => 'Usuário não encontrado.'
             ];
         }
 
-        return false;
+        if (!password_verify($password, $user->password)) {
+            return [
+                'success' => false,
+                'status' => 401,
+                'message' => 'Senha incorreta.'
+            ];
+        }
+
+        $expiresIn = time() + 999999;
+
+        $token = JWT::encode([
+            'id' => $user->id,
+            'name' => $user->name,
+            'expires_in' => $expiresIn,
+        ], $GLOBALS['secretJWT']);
+
+        User::updateToken($user->id, $token);
+
+        return [
+            'success' => true,
+            'token' => $token,
+            'data' => JWT::decode($token, $GLOBALS['secretJWT']),
+        ];
     }
 
     public static function verify($token)
@@ -37,25 +50,44 @@ class AuthService
             $decoded = JWT::decode($token, $GLOBALS['secretJWT']);
 
             if (isset($decoded->expires_in) && $decoded->expires_in < time()) {
-                return ['expired' => true];
+                return [
+                    'success' => false,
+                    'status' => 401,
+                    'message' => 'Token expirado.'
+                ];
             }
 
             $userId = $decoded->sub ?? $decoded->id ?? null;
 
             if (!$userId) {
-                return false;
+                return [
+                    'success' => false,
+                    'status' => 401,
+                    'message' => 'Token inválido.'
+                ];
             }
 
             $userModel = new User();
             $user = $userModel->find($userId);
 
             if (!$user) {
-                return false;
+                return [
+                    'success' => false,
+                    'status' => 404,
+                    'message' => 'Usuário não encontrado.'
+                ];
             }
 
-            return $user;
+            return [
+                'success' => true,
+                'user' => $user
+            ];
         } catch (\Exception $e) {
-            return false;
+            return [
+                'success' => false,
+                'status' => 401,
+                'message' => 'Token inválido.'
+            ];
         }
     }
 }

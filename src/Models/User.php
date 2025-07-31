@@ -124,17 +124,6 @@ class User
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public static function findByToken($token)
-    {
-        $db = Database::getInstance();
-
-        $stmt = $db->prepare("SELECT * FROM users WHERE token = :token LIMIT 1");
-        $stmt->bindParam(':token', $token);
-        $stmt->execute();
-
-        return $stmt->fetch(PDO::FETCH_OBJ);
-    }
-
     public static function updateToken($id, $token)
     {
         $db = Database::getInstance();
