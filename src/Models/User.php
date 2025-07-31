@@ -29,7 +29,7 @@ class User
         $stmt->execute();
 
         if ($stmt->rowCount() > 0) {
-            return ['error' => 'Email already registered'];
+            return ['error' => 'Email já cadastrado'];
         }
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -42,7 +42,7 @@ class User
         if ($stmt->execute()) {
             return ['success' => true];
         } else {
-            return ['error' => 'Failed to create user'];
+            return ['error' => 'Falha ao criar usuário'];
         }
     }
 
@@ -59,7 +59,7 @@ class User
         }
 
         if (empty($data)) {
-            return ['error' => 'No data provided'];
+            return ['error' => 'Nenhum dado fornecido'];
         }
 
         if (isset($data['email'])) {
@@ -69,7 +69,7 @@ class User
             $stmt->execute();
 
             if ($stmt->rowCount() > 0) {
-                return ['error' => 'Email already in use by another user'];
+                return ['error' => 'Email já está em uso por outro usuário'];
             }
         }
 
@@ -91,7 +91,7 @@ class User
         if ($success) {
             return ['success' => true];
         } else {
-            return ['error' => 'Failed to update user'];
+            return ['error' => 'Falha ao atualizar usuário'];
         }
     }
 

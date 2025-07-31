@@ -17,18 +17,18 @@ class AuthMiddleware
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
         $token = str_replace('Bearer ', '', $authHeader);
 
-        $verification = AuthService::verify($token);
+        $auth = AuthService::verify($token);
 
-        if (!$verification) {
+        if (!$auth) {
             (new Response())->unauthorized("Token inválido.");
             exit;
         }
 
-        if (is_array($verification) && ($verification['expired'] ?? false) === true) {
+        if (is_array($auth) && ($auth['expired'] ?? false) === true) {
             (new Response())->unauthorized("Token expirado.");
             exit;
         }
 
-        $_REQUEST['authenticated_user'] = $verification;
+        $_REQUEST['authenticated_user'] = $auth;
     }
 }

@@ -30,9 +30,11 @@ class Router
         $requestMethod = $_POST['_method'] ?? $requestMethod;
         $uri = $requestMethod . ":/" . $uri;
 
-        if (substr_count($uri, "/") >= 2) {
-            $param = substr($uri, strrpos($uri, "/") + 1);
-            $uri = substr($uri, 0, strrpos($uri, "/")) . "/[PARAM]";
+        if (preg_match('#/([^/]+)$#', $uri, $matches)) {
+            $param = $matches[1];
+            if (substr_count($uri, '/') > 1) {
+                $uri = preg_replace('#/([^/]+)$#', '/[PARAM]', $uri);
+            }
         }
 
         $index = array_search($uri, $this->routes);
