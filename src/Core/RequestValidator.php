@@ -12,14 +12,12 @@ class RequestValidator
     {
         $this->errors = [];
 
-        // 1. Verifica se há campos inválidos (não definidos nas regras)
         foreach ($data as $field => $value) {
             if (!array_key_exists($field, $this->rules) && $field !== '_method') {
                 $this->errors[$field][] = "$field is not a valid field";
             }
         }
 
-        // 2. Valida os campos definidos nas regras
         foreach ($this->rules as $field => $ruleString) {
             $rules = explode('|', $ruleString);
             $value = $data[$field] ?? null;

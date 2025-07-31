@@ -2,54 +2,50 @@
 
 namespace Src\Controllers;
 
+use Core\Response;
 use Src\Models\User;
 use Src\Services\AuthService;
 use Src\Core\Validators\AuthValidator;
 
 class AuthController
 {
+    private Response $response;
+
+    public function __construct()
+    {
+        $this->response = new Response();
+    }
+
     public function login()
     {
         $input = json_decode(file_get_contents("php://input"), true);
-
-        if (!$input) {
-            $input = $_POST;
-        }
+        if (!$input) $input = $_POST;
 
         $validator = new AuthValidator();
 
         if (!$validator->validateLogin($input)) {
-            http_response_code(422);
-            echo json_encode(['errors' => $validator->getErrors()]);
-            return;
+            return $this->response->validation($validator->getErrors());
         }
 
         $validated = $validator->validatedData($input);
-
         $auth = AuthService::login($validated['email'], $validated['password']);
 
         if ($auth) {
-            echo json_encode($auth);
-        } else {
-            http_response_code(401);
-            echo json_encode(['error' => 'Invalid login or password']);
+            return $this->response->json($auth);
         }
+
+        return $this->response->unauthorized("Email ou senha inválidos.");
     }
 
     public function register()
     {
         $input = json_decode(file_get_contents("php://input"), true);
-
-        if (!$input) {
-            $input = $_POST;
-        }
+        if (!$input) $input = $_POST;
 
         $validator = new AuthValidator();
 
         if (!$validator->validateRegister($input)) {
-            http_response_code(422);
-            echo json_encode(['errors' => $validator->getErrors()]);
-            return;
+            return $this->response->validation($validator->getErrors());
         }
 
         $validated = $validator->validatedData($input);
@@ -60,10 +56,13 @@ class AuthController
         $result = User::register($name, $email, $password);
 
         if (isset($result['success']) && $result['success'] === true) {
-            echo json_encode(['message' => 'User registered successfully']);
-        } else {
-            http_response_code(400);
-            echo json_encode(['error' => $result['error'] ?? 'Failed to register user']);
+            return $this->response->json(['message' => 'Usuário cadastrado com sucesso']);
         }
+
+        if (isset($result['error']) && str_contains($result['error'], 'Email já cadastrado.')) {
+            return $this->response->conflict("Email já cadastrado.");
+        }
+
+        return $this->response->error($result['error'] ?? 'Erro ao cadastrar usuário');
     }
 }

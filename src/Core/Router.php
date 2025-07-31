@@ -2,8 +2,8 @@
 
 namespace Src\Core;
 
-use Src\Models\User;
-use Src\Services\AuthService;
+use Core\Response;
+use Src\Middleware\AuthMiddleware;
 
 class Router
 {
@@ -45,45 +45,21 @@ class Router
         $class = $callback[0] ?? '';
         $method = $callback[1] ?? '';
 
-        if (class_exists($class)) {
-            if (method_exists($class, $method)) {
-                $instance = new $class();
+        if (class_exists($class) && method_exists($class, $method)) {
+            $instance = new $class();
 
-
-                if ($protected) {
-                    if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-                        // Token geralmente vem no header Authorization: Bearer <token>
-                        $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
-                        $token = str_replace('Bearer ', '', $authHeader);
-
-                        if (AuthService::verify($token)) {
-                            return call_user_func_array([$instance, $method], [$param]);
-                        } else {
-                            http_response_code(401);
-                            echo json_encode(["error" => "Invalid token."]);
-                            return;
-                        }
-                    } else {
-                        http_response_code(401);
-                        echo json_encode(["error" => "Authorization token not provided."]);
-                        return;
-                    }
-                } else {
-                    return call_user_func_array([$instance, $method], [$param]);
-                }
-            } else {
-                $this->notFound();
-                return;
+            if ($protected) {
+                AuthMiddleware::handle();
             }
-        } else {
-            $this->notFound();
-            return;
+
+            return call_user_func_array([$instance, $method], [$param]);
         }
+
+        $this->notFound();
     }
 
     public function notFound()
     {
-        http_response_code(404);
-        echo json_encode(["error" => "Route not found."]);
+        (new Response())->notFound("Rota não encontrada.");
     }
 }

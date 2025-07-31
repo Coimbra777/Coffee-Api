@@ -12,7 +12,7 @@ class AuthService
         $user = User::findByEmail($email);
 
         if ($user && password_verify($password, $user->password)) {
-            $expiresIn = time() + 3600;
+            $expiresIn = time() + 999999;
 
             $token = JWT::encode([
                 'id' => $user->id,
@@ -33,13 +33,25 @@ class AuthService
 
     public static function verify($token)
     {
-        $user = User::findByToken($token);
+        $decoded = JWT::decode($token, $GLOBALS['secretJWT']);
 
-        if ($user) {
-            $decoded = JWT::decode($token, $GLOBALS['secretJWT']);
-            return $decoded->expires_in > time();
+        if (isset($decoded->expires_in) && $decoded->expires_in < time()) {
+            return ['expired' => true];
         }
 
-        return false;
+        $userId = $decoded->sub ?? $decoded->id ?? null;
+
+        if (!$userId) {
+            return false;
+        }
+
+        $userModel = new User();
+        $user = $userModel->find($userId);
+
+        if (!$user) {
+            return false;
+        }
+
+        return $user;
     }
 }
