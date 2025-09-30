@@ -12,11 +12,13 @@ class Database
     public static function getInstance()
     {
         if (!self::$instance) {
-            $host = 'mysql_db';
-            $db = 'coffee';
-            $user = 'user';
-            $pass = 'user123';
-            $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
+            $host = getenv('DB_HOST') ?: 'db';
+            $port = getenv('DB_PORT') ?: 3306;
+            $db   = getenv('DB_NAME') ?: 'coffee';
+            $user = getenv('DB_USER') ?: 'user';
+            $pass = getenv('DB_PASS') ?: 'user123';
+
+            $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
 
             try {
                 self::$instance = new PDO($dsn, $user, $pass, [

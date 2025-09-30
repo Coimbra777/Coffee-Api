@@ -2,7 +2,7 @@
 
 namespace Src\Controllers;
 
-use Core\Response;
+use Src\Core\Response;
 use Src\Models\User;
 use Src\Services\CoffeeService;
 use Src\Core\Validators\DrinkValidator;

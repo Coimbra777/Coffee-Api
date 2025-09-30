@@ -2,7 +2,7 @@
 
 namespace Src\Core;
 
-use Core\Response;
+use Src\Core\Response;
 use Src\Middleware\AuthMiddleware;
 
 class Router

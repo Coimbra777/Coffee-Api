@@ -2,7 +2,7 @@
 
 namespace Src\Middleware;
 
-use Core\Response;
+use Src\Core\Response;
 use Src\Services\AuthService;
 
 class AuthMiddleware

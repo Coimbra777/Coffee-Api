@@ -1,0 +1,19 @@
+{
+  "name": "gabriel/coffee-api",
+  "description": "coffee-api",
+  "authors": [
+    {
+      "name": "Gabriel Coimbra",
+      "email": "gabrielfelipe.coimbra@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Src\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^8.0",
+    "vlucas/phpdotenv": "^5.6"
+  }
+}
