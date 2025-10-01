@@ -7,7 +7,7 @@ use Src\Core\JWT;
 
 class AuthService
 {
-    public static function login($email, $password)
+    public function login($email, $password)
     {
         $user = User::findByEmail($email);
 
@@ -23,16 +23,14 @@ class AuthService
             return [
                 'success' => false,
                 'status' => 401,
-                'message' => 'Senha incorreta.'
+                'message' => 'Usuário ou senha inválidos.'
             ];
         }
-
-        $expiresIn = time() + 999999;
 
         $token = JWT::encode([
             'id' => $user->id,
             'name' => $user->name,
-            'expires_in' => $expiresIn,
+            'expires_in' => time() + 999999,
         ], $GLOBALS['secretJWT']);
 
         User::updateToken($user->id, $token);

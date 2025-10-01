@@ -26,10 +26,11 @@ class Router
         $param = '';
         $callback = '';
         $protected = '';
-        $requestMethod = $_SERVER['REQUEST_METHOD'];
+        $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $requestMethod = $_POST['_method'] ?? $requestMethod;
         $uri = $requestMethod . ":/" . $uri;
 
+        // Detecta parâmetro na rota
         if (preg_match('#/([^/]+)$#', $uri, $matches)) {
             $param = $matches[1];
             if (substr_count($uri, '/') > 1) {
@@ -39,25 +40,37 @@ class Router
 
         $index = array_search($uri, $this->routes);
 
-        if ($index !== false) {
-            $callback = explode("::", $this->callbacks[$index]);
-            $protected = $this->protectedRoutes[$index];
+        if ($index === false) {
+            return $this->notFound();
         }
 
-        $class = $callback[0] ?? '';
-        $method = $callback[1] ?? '';
+        $callback = $this->callbacks[$index];
+        $protected = $this->protectedRoutes[$index];
 
-        if (class_exists($class) && method_exists($class, $method)) {
-            $instance = new $class();
+        // Middleware de proteção
+        if ($protected) {
+            AuthMiddleware::handle();
+        }
 
-            if ($protected) {
-                AuthMiddleware::handle();
+        // Se for callable, chama direto (Closure, função anônima, etc)
+        if (is_callable($callback)) {
+            return $callback($param);
+        }
+
+        // Se for string "Controller::method"
+        if (is_string($callback)) {
+            [$class, $method] = explode('::', $callback);
+
+            if (!class_exists($class) || !method_exists($class, $method)) {
+                return $this->notFound();
             }
 
+            $instance = new $class();
             return call_user_func_array([$instance, $method], [$param]);
         }
 
-        $this->notFound();
+        // Caso inválido
+        return $this->notFound();
     }
 
     public function notFound()

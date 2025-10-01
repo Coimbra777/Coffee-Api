@@ -9,11 +9,18 @@ use Src\Core\Validators\AuthValidator;
 
 class AuthController
 {
-    private Response $response;
+    protected  $response;
+    protected $authValidator;
+    protected $authService;
 
-    public function __construct()
-    {
-        $this->response = new Response();
+    public function __construct(
+        Response $response,
+        AuthValidator $authValidator,
+        AuthService $authService
+    ) {
+        $this->response = $response;
+        $this->authValidator = $authValidator;
+        $this->authService = $authService;
     }
 
     /**
@@ -23,20 +30,20 @@ class AuthController
     {
         $input = json_decode(file_get_contents("php://input"), true) ?? $_POST;
 
-        $validator = new AuthValidator();
-
-        if (!$validator->validateLogin($input)) {
-            return $this->response->validation($validator->getErrors());
+        if (empty($input)) {
+            $this->response->error("Dados de login não fornecidos.", 400);
         }
 
-        $validated = $validator->validatedData($input);
-        $auth = AuthService::login($validated['email'], $validated['password']);
+        $validatedAuth = $this->authValidator->validateLogin($input);
+
+        if (!$validatedAuth) {
+            return $this->response->validation($this->authValidator->getErrors());
+        }
+
+        $auth = $this->authService->login($input['email'], $input['password']);
 
         if ($auth['success']) {
-            return $this->response->json([
-                'token' => $auth['token'],
-                'data' => $auth['data']
-            ]);
+            return $this->response->success('Login realizado com sucesso', $auth);
         }
 
         return $this->response->error($auth['message'], $auth['status']);

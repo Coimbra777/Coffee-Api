@@ -4,8 +4,20 @@ namespace Src\Core;
 
 class Response
 {
+
+    private bool $isTesting;
+
+    public function __construct(bool $isTesting = false)
+    {
+        $this->isTesting = $isTesting;
+    }
+
     private function send(array $body, int $statusCode)
     {
+        if ($this->isTesting) {
+            return ['body' => $body, 'status' => $statusCode];
+        }
+
         http_response_code($statusCode);
         header('Content-Type: application/json');
         echo json_encode($body);
